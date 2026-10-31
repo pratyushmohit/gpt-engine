@@ -1,0 +1,7 @@
+[project]
+name = "gpt-engine"
+version = "0.1.0"
+description = "A GPT and its inference engine, built from scratch on AMD RDNA4"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
