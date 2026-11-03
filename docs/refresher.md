@@ -211,7 +211,19 @@ Each transformer block's **MLP** is: `768 → 3072` (expand 4×), a nonlinearity
 
 ```
 FLOPs = 2 · m · n · k
+
+      (m, k)   @   (k, n)   →   (m, n)
+       ↑  ↑         ↑  ↑         ↑  ↑
+    rows  shared  shared cols  rows cols
 ```
+
+| Letter | What it is | Where to read it | In a linear layer `x @ W` |
+|---|---|---|---|
+| `m` | rows of the output | first dim of the **left** matrix | number of tokens (`B·T`) |
+| `k` | length of each dot product | the **shared** inner dim (appears in both) | input width `C_in` |
+| `n` | columns of the output | last dim of the **right** matrix | output width `C_out` |
+
+So `m · n` = how many output numbers, and `k` = how much work each one takes.
 
 **Derivation:** there are `m · n` output elements. Each is a dot product of length `k`: `k` multiplies and about `k` adds (strictly `k − 1`, but hardware pairs them as a **multiply-add**, so we count `2k`).
 
