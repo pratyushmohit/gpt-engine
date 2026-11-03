@@ -6,8 +6,8 @@ Exercises, answers and mistakes while working through the foundations. The refer
 
 | # | Lesson | Why it matters later | Status |
 |---|---|---|---|
-| 1 | Tensors and matrix multiplication | Almost all of a GPT's computation is matrix multiplication | In progress |
-| 2 | Derivatives and the chain rule; build a tiny autograd by hand | Turns `loss.backward()` from magic into something you've built | — |
+| 1 | Tensors and matrix multiplication | Almost all of a GPT's computation is matrix multiplication | ✅ Done |
+| 2 | Derivatives and the chain rule; build a tiny autograd by hand | Turns `loss.backward()` from magic into something you've built | Next |
 | 3 | Softmax, probability, cross-entropy | How a model turns numbers into "next token" predictions, and how we score it | — |
 | 4 | A training loop in PyTorch | The same loop trains your GPT | — |
 | 5 | A bigram language model | Your first model that generates text; then on to attention | — |
@@ -60,7 +60,9 @@ Follow-up: is `B @ A` allowed? What shape? Is it the same as `A @ B`?
 | 2c | first said invalid, then `(32, 10, 3072)` | ✅ after worked example |
 | 3a | 24 FLOPs (m=2, k=3, n=2) | ✅ |
 | 3b | ≈ 1.2 billion FLOPs (m=1024, k=768, n=768) | ✅ |
-| 4 | | |
+| 4a `x[0]` | first said `(2, ?)`, then `(5, 4)` | ✅ after hint |
+| 4b `x[:, -1, :]` | `(2, 4)` | ✅ after explanation of the syntax |
+| 4c `x.sum(dim=1)` | `(2, 4)` | ✅ |
 
 ### Mistakes and notes
 
@@ -71,6 +73,10 @@ Follow-up: is `B @ A` allowed? What shape? Is it the same as `A @ B`?
   - `n` = columns of the output = last dim of the **right** matrix
   - `m · n` outputs × `2k` FLOPs each. In a linear layer: m = tokens (B·T), k = C_in, n = C_out.
   - See refresher §4.2.
+- **4a:** I thought `x[0]` kept the 2. Indexing with a single number *picks one item* and removes that dimension, like `names[0]` on a Python list.
+- **4b:** The syntax `x[:, -1, :]` was new: one instruction per dimension, comma-separated. `:` keeps a dimension; a number removes it.
+- **4b vs 4c:** both give `(2, 4)` but mean different things: the *last* token vs the *sum* of all tokens. Same shape does not mean same values, so shape checks alone can't catch every bug.
+- **dtype:** `torch.tensor([1, 2])` is `int64`; `torch.tensor([1.0, 2.0])` is `float32`.
 
 ---
 

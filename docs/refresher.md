@@ -81,6 +81,32 @@ A `(B, T, C)` tensor is a list of sequences → each a list of tokens → each a
 
 ### 1.5 Indexing and reductions
 
+**Indexing syntax:** one instruction per dimension, comma-separated, in order.
+
+```
+x[ dim 0 , dim 1 , dim 2 ]
+x[   :   ,  -1   ,   :   ]     →  all sequences, last token, all numbers
+```
+
+| Instruction | Effect on that dimension |
+|---|---|
+| `:` | keep all of it (dimension stays) |
+| `i` (a single number) | pick one item (dimension **removed**), like `my_list[i]` |
+| `-1` | the last item, counting from the end |
+| `a:b` | a range (dimension stays, shorter) |
+
+**`dim` numbering:** dimensions are numbered from 0. For `(B, T, C)`: `dim=0` is B, `dim=1` is T, `dim=2` (or `-1`) is C. `x.sum(dim=1)` adds along the tokens, collapsing them into one.
+
+**Worked example**, `x` of shape `(2, 3, 2)`:
+
+```
+x = [[[1, 2], [3, 4], [5, 6]],      x[:, -1, :]  = [[5, 6], [1, 1]]      (2, 2)  last token of each
+     [[7, 8], [9, 0], [1, 1]]]      x.sum(dim=1) = [[9, 12], [17, 9]]    (2, 2)  sum of all tokens
+                                    x[0]         = [[1, 2], [3, 4], [5, 6]]  (3, 2)  first sequence
+```
+
+Note that `x[:, -1, :]` and `x.sum(dim=1)` have the **same shape but different values**.
+
 For `x` of shape `(B, T, C)`:
 
 | Expression | Result shape | Meaning |
@@ -269,6 +295,9 @@ Applies the same `(C, D)` matrix to every token independently: `(B, T, C) → (B
 **Roughly how many FLOPs does a forward pass take per token?**
 About `2 × parameter count`, because each weight is used in one multiply-add per token.
 
+**What does `logits[:, -1, :]` do in a generation loop, and why?**
+Takes the last position's output for every sequence: `(B, T, V) → (B, V)`. Only the last position predicts the next token.
+
 **FLOPs vs FLOP/s?**
 FLOPs is how much work; FLOP/s is how fast hardware does work. Dividing gives a lower bound on time.
 
@@ -278,6 +307,8 @@ FLOPs is how much work; FLOP/s is how fast hardware does work. Dividing gives a 
 
 - **Wrong matmul order.** `K @ Q.T` instead of `Q @ K.T` may still run (when shapes happen to fit) and silently give wrong results. Check shapes on paper.
 - **Assuming 3-D @ 2-D is invalid.** It's valid; only the last dimension is contracted.
+- **Trusting shapes alone.** Two different operations can give the same shape (e.g. last token vs sum over tokens). Shape checks catch many bugs, not all; compare values against a reference.
+- **Thinking `x[0]` keeps the first dimension.** A single-number index removes it: `(2, 5, 4)[0] → (5, 4)`.
 - **Forgetting `keepdim`.** A reduction drops the dimension, which can break broadcasting later.
 - **`nn.Linear` weight layout.** Stored as `(out, in)`, not `(in, out)`.
 - **Confusing FLOPs with FLOP/s.**
