@@ -36,8 +36,10 @@ Follow-up: is `B @ A` allowed? What shape? Is it the same as `A @ B`?
 - (b) `(8, 4) @ (8, 16)`
 - (c) `(32, 10, 768) @ (768, 3072)`
 
-**3.** Warm-up: how many FLOPs does `A @ B` from exercise 1 take? Count it from the dot products, then check with `2 · m · n · k`.
-Then: how many FLOPs does `(1024, 768) @ (768, 768)` take? Round to "about N billion".
+**3.** For each matmul, first label m, k and n (`(m, k) @ (k, n)`), then compute `2 · m · n · k`.
+
+- (a) Warm-up: `A @ B` from exercise 1, `(2, 3) @ (3, 2)`. Also count it directly from the dot products and check both agree.
+- (b) `(1024, 768) @ (768, 768)`. 768 appears twice; only one of them is k. Round to "about N billion".
 
 **4.** `x` has shape `(2, 5, 4)`. Predict the shape of:
 
@@ -56,12 +58,19 @@ Then: how many FLOPs does `(1024, 768) @ (768, 768)` take? Round to "about N bil
 | 2a | `(4, 16)` | ✅ |
 | 2b | invalid | ✅ |
 | 2c | first said invalid, then `(32, 10, 3072)` | ✅ after worked example |
-| 3 | | |
+| 3a | | |
+| 3b | | |
 | 4 | | |
 
 ### Mistakes and notes
 
 - **2c:** I first thought a 3-D tensor couldn't be multiplied by a 2-D matrix. The matmul only happens over the last dimension; the leading `(B, T)` pass through unchanged.
+- **FLOPs formula:** `2·m·n·k` was unclear until the letters were tied to the shapes:
+  - `m` = rows of the output = first dim of the **left** matrix
+  - `k` = the **shared** inner dim = length of each dot product
+  - `n` = columns of the output = last dim of the **right** matrix
+  - `m · n` outputs × `2k` FLOPs each. In a linear layer: m = tokens (B·T), k = C_in, n = C_out.
+  - See refresher §4.2.
 
 ---
 
