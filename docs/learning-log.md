@@ -58,7 +58,7 @@ Follow-up: is `B @ A` allowed? What shape? Is it the same as `A @ B`?
 | 2a | `(4, 16)` | ✅ |
 | 2b | invalid | ✅ |
 | 2c | first said invalid, then `(32, 10, 3072)` | ✅ after worked example |
-| 3a | | |
+| 3a | 24 FLOPs (m=2, k=3, n=2) | ✅ |
 | 3b | | |
 | 4 | | |
 
